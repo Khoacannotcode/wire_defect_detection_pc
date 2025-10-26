@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 echo ========================================
 echo Wire Defect Detection - Laptop
 echo ========================================
@@ -41,7 +42,7 @@ if not exist "models\best_cropped.onnx" (
     exit /b 1
 )
 
-echo ✅ All checks passed
+echo [OK] All checks passed
 echo.
 echo Starting live detection...
 echo Press 'q' in the camera window to quit

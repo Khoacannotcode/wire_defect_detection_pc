@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 echo ========================================
 echo Wire Defect Detection - Laptop Setup
 echo ========================================
@@ -16,7 +17,7 @@ if %errorlevel% neq 0 (
 )
 
 python --version
-echo ✅ Python found
+echo [OK] Python found
 echo.
 
 REM Create virtual environment
@@ -30,7 +31,7 @@ if exist venv (
         pause
         exit /b 1
     )
-    echo ✅ Virtual environment created
+    echo [OK] Virtual environment created
 )
 echo.
 
@@ -51,7 +52,7 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
-echo ✅ Dependencies installed
+echo [OK] Dependencies installed
 echo.
 
 REM Check model files
@@ -73,7 +74,7 @@ if not exist "models\cropped_info.txt" (
     pause
     exit /b 1
 )
-echo ✅ Model files found
+echo [OK] Model files found
 echo.
 
 REM Test installation
@@ -98,11 +99,11 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
-echo ✅ Installation test passed
+echo [OK] Installation test passed
 echo.
 
 echo ========================================
-echo 🎉 SETUP COMPLETE!
+echo [SUCCESS] SETUP COMPLETE!
 echo ========================================
 echo.
 echo Next steps:

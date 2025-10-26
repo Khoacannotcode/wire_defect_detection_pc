@@ -227,6 +227,7 @@ class LaptopWireDetector:
 
 def test_images():
     """Test detection with sample images"""
+    global USE_PYTORCH
     print("=" * 60)
     print("🧪 Wire Defect Detection - Laptop Image Testing")
     print("=" * 60)
@@ -238,7 +239,6 @@ def test_images():
     if USE_PYTORCH and not os.path.exists(pytorch_model):
         print(f"❌ PyTorch model not found: {pytorch_model}")
         print("Falling back to ONNX...")
-        global USE_PYTORCH
         USE_PYTORCH = False
     
     if not USE_PYTORCH and not os.path.exists(onnx_model):

@@ -228,39 +228,58 @@ class LaptopLiveDetector:
             # Draw bounding box
             cv2.rectangle(result_frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
             
-            # Draw label
+            # Draw label with smaller font
             label = f"{class_name}: {confidence:.2f}"
-            cv2.putText(result_frame, label, (bbox[0], bbox[1]-10), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            cv2.putText(result_frame, label, (bbox[0], bbox[1]-5), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1)
         
-        # Draw statistics overlay
+        # Draw statistics overlay - compact layout
         avg_fps = np.mean(self.fps_history) if self.fps_history else 0
         total_detections = sum(self.detection_counts.values())
         
-        # Background for text
-        cv2.rectangle(result_frame, (10, 10), (400, 120), (0, 0, 0), -1)
-        cv2.rectangle(result_frame, (10, 10), (400, 120), (255, 255, 255), 2)
+        # Get frame dimensions for responsive layout
+        frame_height, frame_width = result_frame.shape[:2]
         
-        # Text
-        cv2.putText(result_frame, f"FPS: {avg_fps:.1f}", (20, 35), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-        cv2.putText(result_frame, f"Total: {total_detections}", (20, 60), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-        cv2.putText(result_frame, f"Fail: {self.detection_counts['fail']}", (20, 85), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-        cv2.putText(result_frame, f"Pagan: {self.detection_counts['pagan']}", (120, 85), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-        cv2.putText(result_frame, f"Valid: {self.detection_counts['valid']}", (220, 85), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        # Compact info box in top-right corner
+        info_width = 280
+        info_height = 80
+        start_x = frame_width - info_width - 10
+        start_y = 10
         
-        # Instructions
-        cv2.putText(result_frame, "Press 'q' to quit", (20, 110), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+        # Semi-transparent background
+        overlay = result_frame.copy()
+        cv2.rectangle(overlay, (start_x, start_y), (start_x + info_width, start_y + info_height), (0, 0, 0), -1)
+        cv2.addWeighted(overlay, 0.7, result_frame, 0.3, 0, result_frame)
+        cv2.rectangle(result_frame, (start_x, start_y), (start_x + info_width, start_y + info_height), (255, 255, 255), 1)
+        
+        # Compact text layout with smaller font
+        font_scale = 0.4
+        font_thickness = 1
+        line_height = 18
+        
+        # FPS and Total on first line
+        cv2.putText(result_frame, f"FPS: {avg_fps:.1f}", (start_x + 5, start_y + 15), 
+                   cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), font_thickness)
+        cv2.putText(result_frame, f"Total: {total_detections}", (start_x + 100, start_y + 15), 
+                   cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), font_thickness)
+        
+        # Detection counts on second line
+        cv2.putText(result_frame, f"Fail: {self.detection_counts['fail']}", (start_x + 5, start_y + 35), 
+                   cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 0, 255), font_thickness)
+        cv2.putText(result_frame, f"Pagan: {self.detection_counts['pagan']}", (start_x + 80, start_y + 35), 
+                   cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 0, 0), font_thickness)
+        cv2.putText(result_frame, f"Valid: {self.detection_counts['valid']}", (start_x + 160, start_y + 35), 
+                   cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 255, 0), font_thickness)
+        
+        # Instructions at bottom
+        cv2.putText(result_frame, "Press 'q' to quit", (start_x + 5, start_y + 55), 
+                   cv2.FONT_HERSHEY_SIMPLEX, font_scale, (200, 200, 200), font_thickness)
         
         return result_frame
 
 def main():
     """Main detection loop"""
+    global USE_PYTORCH
     print("=" * 60)
     print("📹 Wire Defect Detection - Laptop Live Camera")
     print("=" * 60)
@@ -273,7 +292,6 @@ def main():
     if USE_PYTORCH and not os.path.exists(pytorch_model):
         print(f"❌ PyTorch model not found: {pytorch_model}")
         print("Falling back to ONNX...")
-        global USE_PYTORCH
         USE_PYTORCH = False
     
     if not USE_PYTORCH and not os.path.exists(onnx_model):
